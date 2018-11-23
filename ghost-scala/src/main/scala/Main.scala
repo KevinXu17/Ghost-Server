@@ -29,8 +29,8 @@ class Ghost(size: Int) {
 }
 
 class Town(size: Int) {
-  private var ghosts = new Array[Ghost](10);
-  var ghostNumber = 0
+  var ghosts = new Array[Ghost](10);
+  var ghostNumber = 1
   updateGhostLocation()
 
 
@@ -41,12 +41,44 @@ class Town(size: Int) {
     }
   }
 
+  def insertChar(s: String, index: Int): String = {
+    var out = s.substring(0, index) +"👻"+ s.substring(index+1)
+    out
+  }
+
   def getGhostLocation(): String = {
     var output = s"There are $ghostNumber ghosts in town and they are at:\n"
-    for( a <- 0 until ghostNumber){
-      var temp = s"(${ghosts(a).getX()}, ${ghosts(a).getY()})\n"
-      output = output+temp
-    }
+    var graph = printMap(ghosts, ghostNumber)
+    output+"\n"+graph
+  }
+
+  def printMap(gs: Array[Ghost], gostNumber: Int): String = {
+    var output = ""
+      for( i <- 0 until MAP1.m.length) {
+        for (j <- 0 until MAP1.m(1).length) {
+          var include = false
+          for(g <- 0 until gostNumber) {
+            if(i ==gs(g).getX() && j == gs(g).getY()){
+              if(!include) {
+                include = true
+                output = output + "👻"
+              }
+            }
+            if ( i<=(gs(g).getX()+2) && i>=(gs(g).getX()-2) && j>=(gs(g).getY()-2) && j<=(gs(g).getY()+2)) {
+              if(!include) {
+                include = true
+                output = output + "😱"
+              }
+            }
+          }
+          if (!include && 1 == MAP1.m(i)(j)) {
+            output = output + '⬛'
+          }else if (!include){
+            output = output + '⬜'
+          }
+        }
+        output = output+'\n'
+      }
     output
   }
 
@@ -57,7 +89,7 @@ class Town(size: Int) {
 object Main extends App {
   var host = "0.0.0.0"
   var port = 3001
-  var SIZE = 200
+  var SIZE = 50
   var town = new Town(SIZE)
 
   implicit val system: ActorSystem = ActorSystem(name = "ghost-server")
